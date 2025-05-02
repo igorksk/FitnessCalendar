@@ -1,0 +1,37 @@
+@model IEnumerable<FitnessCalendar.Models.FitnessRecord>
+
+@{
+    ViewData["Title"] = "Календарь тренировок";
+}
+
+<h1>Календарь тренировок</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Добавить запись</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Вес</th>
+            <th>FullBody</th>
+            <th>Stretching</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Date.ToShortDateString()</td>
+                <td>@item.Weight</td>
+                <td>@(item.FullBodyTraining?.Name ?? "-")</td>
+                <td>@(item.Stretching?.Name ?? "-")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редактировать</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table> 
