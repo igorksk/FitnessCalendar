@@ -1,21 +1,30 @@
-@model IEnumerable<FitnessCalendar.Models.FitnessRecord>
+@model IPagedList<FitnessCalendar.Models.FitnessRecord>
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+@using X.PagedList.Web.Common
 
 @{
-    ViewData["Title"] = "Календарь тренировок";
+    ViewData["Title"] = "Workout Calendar";
 }
 
-<h1>Календарь тренировок</h1>
+<h1>Workout Calendar</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Добавить запись</a>
+    <a asp-action="Create" class="btn btn-primary">Add Record</a>
 </p>
 
-<table class="table">
+<div class="row">
+    <div class="col-md-12">
+        <canvas id="weightChart"></canvas>
+    </div>
+</div>
+
+<table class="table mt-4">
     <thead>
         <tr>
-            <th>Дата</th>
-            <th>Вес</th>
-            <th>FullBody</th>
+            <th>Date</th>
+            <th>Weight</th>
+            <th>Full Body</th>
             <th>Stretching</th>
             <th></th>
         </tr>
@@ -29,9 +38,71 @@
                 <td>@(item.FullBodyTraining?.Name ?? "-")</td>
                 <td>@(item.Stretching?.Name ?? "-")</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редактировать</a>
+                    <div class="btn-group" role="group">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                    </div>
                 </td>
             </tr>
         }
     </tbody>
-</table> 
+</table>
+
+<div class="pagination-container">
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { page = page }),
+        new PagedListRenderOptions {
+            LiElementClasses = new[] { "page-item" },
+            PageClasses = new[] { "page-link" },
+            Display = PagedListDisplayMode.IfNeeded,
+            MaximumPageNumbersToDisplay = 5
+        })
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx = document.getElementById('weightChart').getContext('2d');
+            var dates = @Html.Raw(Json.Serialize(Model.OrderBy(r => r.Date).Select(r => r.Date.ToString("yyyy-MM-dd")).ToList()));
+            var weights = @Html.Raw(Json.Serialize(Model.OrderBy(r => r.Date).Select(r => r.Weight).ToList()));
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Weight (kg)',
+                        data: weights,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Weight (kg)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Weight changes over time'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+} 

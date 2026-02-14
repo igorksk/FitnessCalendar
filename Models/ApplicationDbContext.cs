@@ -2,13 +2,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FitnessCalendar.Models
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
-
         public DbSet<TrainingType> TrainingTypes { get; set; }
         public DbSet<FitnessRecord> FitnessRecords { get; set; }
 

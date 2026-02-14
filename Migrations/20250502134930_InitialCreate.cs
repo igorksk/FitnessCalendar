@@ -1,9 +1,6 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
-
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
 namespace FitnessCalendar.Migrations
 {
@@ -58,8 +55,8 @@ namespace FitnessCalendar.Migrations
                 columns: new[] { "Id", "Description", "Name" },
                 values: new object[,]
                 {
-                    { 1, "Тренировка всего тела", "FullBody" },
-                    { 2, "Растяжка", "Stretching" }
+                    { 1, "Full body workout", "FullBody" },
+                    { 2, "Stretching", "Stretching" }
                 });
 
             migrationBuilder.CreateIndex(

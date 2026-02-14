@@ -77,13 +77,13 @@ namespace FitnessCalendar.Migrations
                         new
                         {
                             Id = 1,
-                            Description = "Тренировка всего тела",
+                            Description = "Full body workout",
                             Name = "FullBody"
                         },
                         new
                         {
                             Id = 2,
-                            Description = "Растяжка",
+                            Description = "Stretching",
                             Name = "Stretching"
                         });
                 });

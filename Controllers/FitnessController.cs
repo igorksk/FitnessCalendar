@@ -1,31 +1,34 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using FitnessCalendar.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using X.PagedList;
 
 namespace FitnessCalendar.Controllers
 {
-    public class FitnessController : Controller
+    public class FitnessController(ApplicationDbContext context) : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context = context;
 
-        public FitnessController(ApplicationDbContext context)
+        public async Task<IActionResult> Index(int? page)
         {
-            _context = context;
-        }
-
-        public async Task<IActionResult> Index()
-        {
+            int pageSize = 90;
+            int pageNumber = page ?? 1;
+            
             var records = await _context.FitnessRecords
                 .Include(r => r.FullBodyTraining)
                 .Include(r => r.Stretching)
                 .OrderByDescending(r => r.Date)
-                .ToListAsync();
+                .ToPagedListAsync(pageNumber, pageSize);
+
             return View(records);
         }
 
         public async Task<IActionResult> Create()
         {
-            ViewBag.TrainingTypes = await _context.TrainingTypes.ToListAsync();
+            var trainingTypes = await _context.TrainingTypes.ToListAsync();
+            ViewBag.FullBodyTypes = trainingTypes.Where(t => t.Name.Contains("FullBody")).ToList();
+            ViewBag.StretchingTypes = trainingTypes.Where(t => t.Name.Contains("Stretching")).ToList();
             return View();
         }
 
@@ -39,7 +42,9 @@ namespace FitnessCalendar.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.TrainingTypes = await _context.TrainingTypes.ToListAsync();
+            var trainingTypes = await _context.TrainingTypes.ToListAsync();
+            ViewBag.FullBodyTypes = trainingTypes.Where(t => t.Name.Contains("FullBody")).ToList();
+            ViewBag.StretchingTypes = trainingTypes.Where(t => t.Name.Contains("Stretching")).ToList();
             return View(record);
         }
 
@@ -56,7 +61,9 @@ namespace FitnessCalendar.Controllers
                 return NotFound();
             }
 
-            ViewBag.TrainingTypes = await _context.TrainingTypes.ToListAsync();
+            var trainingTypes = await _context.TrainingTypes.ToListAsync();
+            ViewBag.FullBodyTypes = trainingTypes.Where(t => t.Name.Contains("FullBody")).ToList();
+            ViewBag.StretchingTypes = trainingTypes.Where(t => t.Name.Contains("Stretching")).ToList();
             return View(record);
         }
 
@@ -89,8 +96,43 @@ namespace FitnessCalendar.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.TrainingTypes = await _context.TrainingTypes.ToListAsync();
+            var trainingTypes = await _context.TrainingTypes.ToListAsync();
+            ViewBag.FullBodyTypes = trainingTypes.Where(t => t.Name.Contains("FullBody")).ToList();
+            ViewBag.StretchingTypes = trainingTypes.Where(t => t.Name.Contains("Stretching")).ToList();
             return View(record);
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var record = await _context.FitnessRecords
+                .Include(r => r.FullBodyTraining)
+                .Include(r => r.Stretching)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            
+            if (record == null)
+            {
+                return NotFound();
+            }
+
+            return View(record);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var record = await _context.FitnessRecords.FindAsync(id);
+            if (record != null)
+            {
+                _context.FitnessRecords.Remove(record);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         private bool FitnessRecordExists(int id)
