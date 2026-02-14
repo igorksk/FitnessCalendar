@@ -6,6 +6,9 @@ namespace FitnessCalendar.Models
     {
         public int Id { get; set; }
 
+        public const int FullBodyTrainingId = 1;
+        public const int StretchingId = 2;
+
         [Required]
         [StringLength(50)]
         public required string Name { get; set; }

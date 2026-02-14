@@ -26,9 +26,8 @@ namespace FitnessCalendar.Controllers
 
         public async Task<IActionResult> Create()
         {
-            var trainingTypes = await _context.TrainingTypes.ToListAsync();
-            ViewBag.FullBodyTypes = trainingTypes.Where(t => t.Name.Contains("FullBody")).ToList();
-            ViewBag.StretchingTypes = trainingTypes.Where(t => t.Name.Contains("Stretching")).ToList();
+            ViewBag.FullBodyTypes = await GetFullBodyTypesAsync();
+            ViewBag.StretchingTypes = await GetStretchingTypesAsync();
             return View();
         }
 
@@ -42,9 +41,8 @@ namespace FitnessCalendar.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            var trainingTypes = await _context.TrainingTypes.ToListAsync();
-            ViewBag.FullBodyTypes = trainingTypes.Where(t => t.Name.Contains("FullBody")).ToList();
-            ViewBag.StretchingTypes = trainingTypes.Where(t => t.Name.Contains("Stretching")).ToList();
+            ViewBag.FullBodyTypes = await GetFullBodyTypesAsync();
+            ViewBag.StretchingTypes = await GetStretchingTypesAsync();
             return View(record);
         }
 
@@ -60,10 +58,8 @@ namespace FitnessCalendar.Controllers
             {
                 return NotFound();
             }
-
-            var trainingTypes = await _context.TrainingTypes.ToListAsync();
-            ViewBag.FullBodyTypes = trainingTypes.Where(t => t.Name.Contains("FullBody")).ToList();
-            ViewBag.StretchingTypes = trainingTypes.Where(t => t.Name.Contains("Stretching")).ToList();
+            ViewBag.FullBodyTypes = await GetFullBodyTypesAsync();
+            ViewBag.StretchingTypes = await GetStretchingTypesAsync();
             return View(record);
         }
 
@@ -96,9 +92,8 @@ namespace FitnessCalendar.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            var trainingTypes = await _context.TrainingTypes.ToListAsync();
-            ViewBag.FullBodyTypes = trainingTypes.Where(t => t.Name.Contains("FullBody")).ToList();
-            ViewBag.StretchingTypes = trainingTypes.Where(t => t.Name.Contains("Stretching")).ToList();
+            ViewBag.FullBodyTypes = await GetFullBodyTypesAsync();
+            ViewBag.StretchingTypes = await GetStretchingTypesAsync();
             return View(record);
         }
 
@@ -138,6 +133,18 @@ namespace FitnessCalendar.Controllers
         private bool FitnessRecordExists(int id)
         {
             return _context.FitnessRecords.Any(e => e.Id == id);
+        }
+
+        private async Task<List<TrainingType>> GetFullBodyTypesAsync()
+        {
+            var trainingTypes = await _context.TrainingTypes.ToListAsync();
+            return [.. trainingTypes.Where(t => t.Id == TrainingType.FullBodyTrainingId)];
+        }
+
+        private async Task<List<TrainingType>> GetStretchingTypesAsync()
+        {
+            var trainingTypes = await _context.TrainingTypes.ToListAsync();
+            return [.. trainingTypes.Where(t => t.Id == TrainingType.StretchingId)];
         }
     }
 } 
